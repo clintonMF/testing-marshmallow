@@ -1,9 +1,10 @@
 from datetime import datetime
 import os
 from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
+from extension import db
 from schema import UserSchema
 from marshmallow import ValidationError
+from models import User
 
 
 
@@ -17,41 +18,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] =\
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'super_secret_key'
 
-db = SQLAlchemy(app)
+db.init_app(app)
 
-class User(db.Model):
-    """ The Customer model """
-
-    __tablename__ = "User"
-
-    id = db.Column(db.Integer, primary_key=True)
-    # id = db.Column(db.String(), primary_key=True, default=lambda: str(uuid.uuid4()))
-    username = db.Column(db.String(32), nullable=False, unique=True)
-    first_name = db.Column(db.String(300))
-    last_name = db.Column(db.String(300))
-    email = db.Column(db.String(100), nullable=False, unique=True)
-    phone = db.Column(db.String(15))
-    password = db.Column(db.Text(), nullable=False)
-    country = db.Column(db.String(50))
-    state = db.Column(db.String(70))
-    city = db.Column(db.String(50))
-    street_name = db.Column(db.String(50))
-    zipcode = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime(), default=datetime.utcnow)
-    
-    @classmethod
-    def get_by_id(cls, user_id):
-        return cls.query.filter_by(id=user_id).first()
-    
-    @classmethod
-    def get_by_username(cls, username):
-        return cls.query.filter_by(username=username).first()
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
+with app.app_context():
+    db.create_all()
 
 user_login_schema = UserSchema(only=("username","password", "email"))
 user_schema_many = UserSchema(many=True)
@@ -86,5 +56,4 @@ def create_user():
         return {"message": "error"}
     
 if __name__ == '__main__':
-    db.create_all()
     app.run(debug=True)

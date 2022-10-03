@@ -169,13 +169,4 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/flask
 
-extensions.py
 database.db
-models.py
-
-git init
-git add .
-git commit -m "first commit"
-git branch -M master
-git remote add origin https://github.com/clintonMF/testing-marshmallow.git
-git push -u origin master
