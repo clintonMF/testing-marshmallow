@@ -23,8 +23,8 @@ class Customer(db.Model):
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow)
     
     @classmethod
-    def get_by_id(cls, user_id):
-        return cls.query.filter_by(id=user_id).first()
+    def get_by_id(cls, customer_id):
+        return cls.query.filter_by(id=customer_id).first()
     
     @classmethod
     def get_by_username(cls, username):
