@@ -2,9 +2,9 @@ from datetime import datetime
 import os
 from flask import Flask, request
 from extension import db
-from schema import UserSchema
+from schema import CustomerSchema
 from marshmallow import ValidationError
-from models import User
+from models import Customer
 
 
 
@@ -23,35 +23,51 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-user_login_schema = UserSchema(only=("username","password", "email"))
-user_schema_many = UserSchema(many=True)
+
+customer_schema = CustomerSchema()
+customer_login_schema = CustomerSchema(only=("username","password", "email"))
+customer_schema_many = CustomerSchema(many=True)
 
 @app.route('/')
 def main():
-    users = User.query.all()
-    return user_schema_many.dump(users)
+    customers = Customer.query.all()
+    return customer_schema_many.dump(customers)
 
 @app.route('/users/<int:user_id>')
 def get_user(user_id):
-    user = User.get_by_id(user_id)
+    customer = Customer.get_by_id(user_id)
+    if not customer:
+        return {"message": "user not fond"}, 404
     
-    return UserSchema().dump(user), 200
+    return customer_schema.dump(customer), 200
     
 @app.route('/users', methods=["POST"])
-def create_user():
+def create_customer():
     try:
         json_data = request.get_json()
         try:
-            data = user_login_schema.load(json_data)
+            data = customer_login_schema.load(json_data)
         except ValidationError as err:
             return {
                 "message": "Validation error",
                 "errors": err.messages
                 }, 401
-        user = User(**data)
+        email = json_data["email"]
+        username = json_data["username"]
         
-        user.save()
-        return user_login_schema.dump(data), 201
+        
+        # checking for duplicate data
+        if Customer.get_by_username(username):
+            return {"message": "this username exist"}, 400
+        if Customer.get_by_email(email):
+            return {"message": "this email exist"}, 400
+        
+        # unpacking the data into key word argument using **
+        customer = Customer(**data)
+        
+        customer.save()
+        
+        return customer_login_schema.dump(data), 201
     except:
         return {"message": "error"}
     

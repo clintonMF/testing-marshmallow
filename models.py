@@ -1,7 +1,7 @@
 from extension import db
 from datetime import datetime
 
-class User(db.Model):
+class Customer(db.Model):
     """ The Customer model """
 
     __tablename__ = "customers"
@@ -29,6 +29,9 @@ class User(db.Model):
     @classmethod
     def get_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
+    @classmethod
+    def get_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
     
     def save(self):
         db.session.add(self)

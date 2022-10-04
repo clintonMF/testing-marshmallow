@@ -32,7 +32,7 @@ def password_strength(s):
         print("Invalid Password")
         raise ValidationError("password is very weak")
 
-class UserSchema(Schema):
+class CustomerSchema(Schema):
     class Meta: ordered = True
     
     id = fields.Int(dump_only = True)
